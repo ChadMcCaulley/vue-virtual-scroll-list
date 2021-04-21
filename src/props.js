@@ -48,6 +48,10 @@ export const VirtualProps = {
     type: Number,
     default: 0
   },
+  scrollelement: {
+    type: typeof window === 'undefined' ? Object : HTMLElement,
+    default: null
+  },
   pageMode: {
     type: Boolean,
     default: false

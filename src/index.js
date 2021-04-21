@@ -2,10 +2,11 @@
  * virtual list default component
  */
 
-import Vue from 'vue'
-import Virtual from './virtual'
 import { Item, Slot } from './item'
+
+import Virtual from './virtual'
 import { VirtualProps } from './props'
+import Vue from 'vue'
 
 const EVENT_TYPE = {
   ITEM: 'item_resize',
@@ -42,6 +43,21 @@ const VirtualList = Vue.component('virtual-list', {
 
     offset (newValue) {
       this.scrollToOffset(newValue)
+    },
+    scrollelement (newScrollelement, oldScrollelement) {
+      if (this.pagemode) {
+        return
+      }
+      if (oldScrollelement) {
+        this.scrollelement.removeEventListener('scroll', this.onScroll, {
+          passive: false
+        })
+      }
+      if (newScrollelement) {
+        this.scrollelement.addEventListener('scroll', this.onScroll, {
+          passive: false
+        })
+      }
     }
   },
 
@@ -80,6 +96,10 @@ const VirtualList = Vue.component('virtual-list', {
       document.addEventListener('scroll', this.onScroll, {
         passive: false
       })
+    } else if (this.scrollelement) {
+      this.scrollelement.addEventListener('scroll', this.onScroll, {
+        passive: false
+      })
     }
   },
 
@@ -87,6 +107,10 @@ const VirtualList = Vue.component('virtual-list', {
     this.virtual.destroy()
     if (this.pageMode) {
       document.removeEventListener('scroll', this.onScroll)
+    } else if (this.scrollelement) {
+      this.scrollelement.removeEventListener('scroll', this.onScroll, {
+        passive: false
+      })
     }
   },
 
@@ -105,6 +129,8 @@ const VirtualList = Vue.component('virtual-list', {
     getOffset () {
       if (this.pageMode) {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
+      } else if (this.scrollelement) {
+        return this.scrollelement[this.directionKey]
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[this.directionKey]) : 0
@@ -116,6 +142,8 @@ const VirtualList = Vue.component('virtual-list', {
       const key = this.isHorizontal ? 'clientWidth' : 'clientHeight'
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
+      } else if (this.scrollelement) {
+        return this.scrollelement[key]
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[key]) : 0
@@ -127,6 +155,8 @@ const VirtualList = Vue.component('virtual-list', {
       const key = this.isHorizontal ? 'scrollWidth' : 'scrollHeight'
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
+      } else if (this.scrollelement) {
+        return this.scrollelement[key]
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[key]) : 0
@@ -138,6 +168,8 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         document.body[this.directionKey] = offset
         document.documentElement[this.directionKey] = offset
+      } else if (this.scrollelement) {
+        this.scrollelement[this.directionKey] = offset
       } else {
         const { root } = this.$refs
         if (root) {

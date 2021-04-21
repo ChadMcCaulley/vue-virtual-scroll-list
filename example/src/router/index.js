@@ -1,6 +1,6 @@
+import Index from '../views/home/Main.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Index from '../views/home/Main.vue'
 
 Vue.use(VueRouter)
 
@@ -41,6 +41,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "chat-room" */ '../views/chat-room/Main.vue')
   },
   {
+    path: '/scrollelement',
+    name: 'scrollelement',
+    component: () => import(/* webpackChunkName: "scrollelement" */ '../views/scrollelement/Main.vue')
+  },
+  {
     path: '/page-mode',
     name: 'page-mode',
     component: () => import(/* webpackChunkName: "page-mode" */ '../views/page-mode/Main.vue')
@@ -49,13 +54,13 @@ const routes = [
 
 // just for development, if you want to run this project in your local
 // please copy a any example and rename it as dev in example/src/views folder
-if (process.env.NODE_ENV === 'development') {
-  routes.push({
-    path: '/dev',
-    name: 'dev',
-    component: () => import(/* webpackChunkName: "dev" */ '../views/dev/Main.vue')
-  })
-}
+// if (process.env.NODE_ENV === 'development') {
+//   routes.push({
+//     path: '/dev',
+//     name: 'dev',
+//     component: () => import(/* webpackChunkName: "dev" */ '../views/dev/Main.vue')
+//   })
+// }
 
 const router = new VueRouter({
   routes

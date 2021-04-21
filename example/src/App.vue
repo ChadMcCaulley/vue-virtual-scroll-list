@@ -15,6 +15,8 @@
       <span class="line">|</span>
       <router-link to="/page-mode">page mode</router-link>
       <span class="line">|</span>
+      <router-link to="/scrollelement">scrollelement</router-link>
+      <span class="line">|</span>
       <router-link to="/chat-room">chat room</router-link>
     </div>
     <router-view/>
