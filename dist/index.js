@@ -34,6 +34,55 @@
     return Constructor;
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+
+    return target;
+  }
+
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
@@ -66,6 +115,242 @@
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
+
+  /**
+   * props declaration for default, item and slot component
+   */
+  var VirtualProps = {
+    dataKey: {
+      type: [String, Function],
+      required: true
+    },
+    dataSources: {
+      type: Array,
+      required: true
+    },
+    dataComponent: {
+      type: [Object, Function],
+      required: true
+    },
+    keeps: {
+      type: Number,
+      "default": 30
+    },
+    extraProps: {
+      type: Object
+    },
+    estimateSize: {
+      type: Number,
+      "default": 50
+    },
+    direction: {
+      type: String,
+      "default": 'vertical' // the other value is horizontal
+
+    },
+    start: {
+      type: Number,
+      "default": 0
+    },
+    offset: {
+      type: Number,
+      "default": 0
+    },
+    topThreshold: {
+      type: Number,
+      "default": 0
+    },
+    bottomThreshold: {
+      type: Number,
+      "default": 0
+    },
+    scrollelement: {
+      type: typeof window === 'undefined' ? Object : HTMLElement,
+      "default": null
+    },
+    pageMode: {
+      type: Boolean,
+      "default": false
+    },
+    rootTag: {
+      type: String,
+      "default": 'div'
+    },
+    wrapTag: {
+      type: String,
+      "default": 'div'
+    },
+    wrapClass: {
+      type: String,
+      "default": ''
+    },
+    wrapStyle: {
+      type: Object
+    },
+    itemTag: {
+      type: String,
+      "default": 'div'
+    },
+    itemClass: {
+      type: String,
+      "default": ''
+    },
+    itemClassAdd: {
+      type: Function
+    },
+    itemStyle: {
+      type: Object
+    },
+    headerTag: {
+      type: String,
+      "default": 'div'
+    },
+    headerClass: {
+      type: String,
+      "default": ''
+    },
+    headerStyle: {
+      type: Object
+    },
+    footerTag: {
+      type: String,
+      "default": 'div'
+    },
+    footerClass: {
+      type: String,
+      "default": ''
+    },
+    footerStyle: {
+      type: Object
+    },
+    itemScopedSlots: {
+      type: Object
+    }
+  };
+  var ItemProps = {
+    index: {
+      type: Number
+    },
+    event: {
+      type: String
+    },
+    tag: {
+      type: String
+    },
+    horizontal: {
+      type: Boolean
+    },
+    source: {
+      type: Object
+    },
+    component: {
+      type: [Object, Function]
+    },
+    uniqueKey: {
+      type: [String, Number]
+    },
+    extraProps: {
+      type: Object
+    },
+    scopedSlots: {
+      type: Object
+    }
+  };
+  var SlotProps = {
+    event: {
+      type: String
+    },
+    uniqueKey: {
+      type: String
+    },
+    tag: {
+      type: String
+    },
+    horizontal: {
+      type: Boolean
+    }
+  };
+
+  var Wrapper = {
+    created: function created() {
+      this.shapeKey = this.horizontal ? 'offsetWidth' : 'offsetHeight';
+    },
+    mounted: function mounted() {
+      var _this = this;
+
+      if (typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(function () {
+          _this.dispatchSizeChange();
+        });
+        this.resizeObserver.observe(this.$el);
+      }
+    },
+    // since componet will be reused, so disptach when updated
+    updated: function updated() {
+      this.dispatchSizeChange();
+    },
+    beforeDestroy: function beforeDestroy() {
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
+    },
+    methods: {
+      getCurrentSize: function getCurrentSize() {
+        return this.$el ? this.$el[this.shapeKey] : 0;
+      },
+      // tell parent current size identify by unqiue key
+      dispatchSizeChange: function dispatchSizeChange() {
+        this.$parent.$emit(this.event, this.uniqueKey, this.getCurrentSize(), this.hasInitial);
+      }
+    }
+  }; // wrapping for item
+
+  var Item = Vue.component('virtual-list-item', {
+    mixins: [Wrapper],
+    props: ItemProps,
+    render: function render(h) {
+      var tag = this.tag,
+          component = this.component,
+          _this$extraProps = this.extraProps,
+          extraProps = _this$extraProps === void 0 ? {} : _this$extraProps,
+          index = this.index,
+          source = this.source,
+          _this$scopedSlots = this.scopedSlots,
+          scopedSlots = _this$scopedSlots === void 0 ? {} : _this$scopedSlots,
+          uniqueKey = this.uniqueKey;
+
+      var props = _objectSpread2({}, extraProps, {
+        source: source,
+        index: index
+      });
+
+      return h(tag, {
+        key: uniqueKey,
+        attrs: {
+          role: 'listitem'
+        }
+      }, [h(component, {
+        props: props,
+        scopedSlots: scopedSlots
+      })]);
+    }
+  }); // wrapping for slot
+
+  var Slot = Vue.component('virtual-list-slot', {
+    mixins: [Wrapper],
+    props: SlotProps,
+    render: function render(h) {
+      var tag = this.tag,
+          uniqueKey = this.uniqueKey;
+      return h(tag, {
+        key: uniqueKey,
+        attrs: {
+          role: uniqueKey
+        }
+      }, this.$slots["default"]);
+    }
+  });
 
   /**
    * virtual list core calculating center
@@ -411,237 +696,6 @@
   }();
 
   /**
-   * props declaration for default, item and slot component
-   */
-  var VirtualProps = {
-    dataKey: {
-      type: [String, Function],
-      required: true
-    },
-    dataSources: {
-      type: Array,
-      required: true
-    },
-    dataComponent: {
-      type: [Object, Function],
-      required: true
-    },
-    keeps: {
-      type: Number,
-      "default": 30
-    },
-    extraProps: {
-      type: Object
-    },
-    estimateSize: {
-      type: Number,
-      "default": 50
-    },
-    direction: {
-      type: String,
-      "default": 'vertical' // the other value is horizontal
-
-    },
-    start: {
-      type: Number,
-      "default": 0
-    },
-    offset: {
-      type: Number,
-      "default": 0
-    },
-    topThreshold: {
-      type: Number,
-      "default": 0
-    },
-    bottomThreshold: {
-      type: Number,
-      "default": 0
-    },
-    pageMode: {
-      type: Boolean,
-      "default": false
-    },
-    rootTag: {
-      type: String,
-      "default": 'div'
-    },
-    wrapTag: {
-      type: String,
-      "default": 'div'
-    },
-    wrapClass: {
-      type: String,
-      "default": ''
-    },
-    wrapStyle: {
-      type: Object
-    },
-    itemTag: {
-      type: String,
-      "default": 'div'
-    },
-    itemClass: {
-      type: String,
-      "default": ''
-    },
-    itemClassAdd: {
-      type: Function
-    },
-    itemStyle: {
-      type: Object
-    },
-    headerTag: {
-      type: String,
-      "default": 'div'
-    },
-    headerClass: {
-      type: String,
-      "default": ''
-    },
-    headerStyle: {
-      type: Object
-    },
-    footerTag: {
-      type: String,
-      "default": 'div'
-    },
-    footerClass: {
-      type: String,
-      "default": ''
-    },
-    footerStyle: {
-      type: Object
-    },
-    itemScopedSlots: {
-      type: Object
-    }
-  };
-  var ItemProps = {
-    index: {
-      type: Number
-    },
-    event: {
-      type: String
-    },
-    tag: {
-      type: String
-    },
-    horizontal: {
-      type: Boolean
-    },
-    source: {
-      type: Object
-    },
-    component: {
-      type: [Object, Function]
-    },
-    uniqueKey: {
-      type: [String, Number]
-    },
-    extraProps: {
-      type: Object
-    },
-    scopedSlots: {
-      type: Object
-    }
-  };
-  var SlotProps = {
-    event: {
-      type: String
-    },
-    uniqueKey: {
-      type: String
-    },
-    tag: {
-      type: String
-    },
-    horizontal: {
-      type: Boolean
-    }
-  };
-
-  /**
-   * item and slot component both use similar wrapper
-   * we need to know their size change at any time
-   */
-  var Wrapper = {
-    created: function created() {
-      this.shapeKey = this.horizontal ? 'offsetWidth' : 'offsetHeight';
-    },
-    mounted: function mounted() {
-      var _this = this;
-
-      if (typeof ResizeObserver !== 'undefined') {
-        this.resizeObserver = new ResizeObserver(function () {
-          _this.dispatchSizeChange();
-        });
-        this.resizeObserver.observe(this.$el);
-      }
-    },
-    // since componet will be reused, so disptach when updated
-    updated: function updated() {
-      this.dispatchSizeChange();
-    },
-    beforeDestroy: function beforeDestroy() {
-      if (this.resizeObserver) {
-        this.resizeObserver.disconnect();
-        this.resizeObserver = null;
-      }
-    },
-    methods: {
-      getCurrentSize: function getCurrentSize() {
-        return this.$el ? this.$el[this.shapeKey] : 0;
-      },
-      // tell parent current size identify by unqiue key
-      dispatchSizeChange: function dispatchSizeChange() {
-        this.$parent.$emit(this.event, this.uniqueKey, this.getCurrentSize(), this.hasInitial);
-      }
-    }
-  }; // wrapping for item
-
-  var Item = Vue.component('virtual-list-item', {
-    mixins: [Wrapper],
-    props: ItemProps,
-    render: function render(h) {
-      var tag = this.tag,
-          component = this.component,
-          _this$extraProps = this.extraProps,
-          extraProps = _this$extraProps === void 0 ? {} : _this$extraProps,
-          index = this.index,
-          _this$scopedSlots = this.scopedSlots,
-          scopedSlots = _this$scopedSlots === void 0 ? {} : _this$scopedSlots,
-          uniqueKey = this.uniqueKey;
-      extraProps.source = this.source;
-      extraProps.index = index;
-      return h(tag, {
-        key: uniqueKey,
-        attrs: {
-          role: 'listitem'
-        }
-      }, [h(component, {
-        props: extraProps,
-        scopedSlots: scopedSlots
-      })]);
-    }
-  }); // wrapping for slot
-
-  var Slot = Vue.component('virtual-list-slot', {
-    mixins: [Wrapper],
-    props: SlotProps,
-    render: function render(h) {
-      var tag = this.tag,
-          uniqueKey = this.uniqueKey;
-      return h(tag, {
-        key: uniqueKey,
-        attrs: {
-          role: uniqueKey
-        }
-      }, this.$slots["default"]);
-    }
-  });
-
-  /**
    * virtual list default component
    */
   var EVENT_TYPE = {
@@ -649,9 +703,9 @@
     SLOT: 'slot_resize'
   };
   var SLOT_TYPE = {
-    HEADER: 'header',
+    HEADER: 'thead',
     // string value also use for aria role attribute
-    FOOTER: 'footer'
+    FOOTER: 'tfoot'
   };
   var VirtualList = Vue.component('virtual-list', {
     props: VirtualProps,
@@ -674,6 +728,23 @@
       },
       offset: function offset(newValue) {
         this.scrollToOffset(newValue);
+      },
+      scrollelement: function scrollelement(newScrollelement, oldScrollelement) {
+        if (this.pagemode) {
+          return;
+        }
+
+        if (oldScrollelement) {
+          this.scrollelement.removeEventListener('scroll', this.onScroll, {
+            passive: false
+          });
+        }
+
+        if (newScrollelement) {
+          this.scrollelement.addEventListener('scroll', this.onScroll, {
+            passive: false
+          });
+        }
       }
     },
     created: function created() {
@@ -705,6 +776,10 @@
         document.addEventListener('scroll', this.onScroll, {
           passive: false
         });
+      } else if (this.scrollelement) {
+        this.scrollelement.addEventListener('scroll', this.onScroll, {
+          passive: false
+        });
       }
     },
     beforeDestroy: function beforeDestroy() {
@@ -712,6 +787,10 @@
 
       if (this.pageMode) {
         document.removeEventListener('scroll', this.onScroll);
+      } else if (this.scrollelement) {
+        this.scrollelement.removeEventListener('scroll', this.onScroll, {
+          passive: false
+        });
       }
     },
     methods: {
@@ -727,6 +806,8 @@
       getOffset: function getOffset() {
         if (this.pageMode) {
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
+        } else if (this.scrollelement) {
+          return this.scrollelement[this.directionKey];
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[this.directionKey]) : 0;
@@ -738,6 +819,8 @@
 
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
+        } else if (this.scrollelement) {
+          return this.scrollelement[key];
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -749,6 +832,8 @@
 
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
+        } else if (this.scrollelement) {
+          return this.scrollelement[key];
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -759,6 +844,8 @@
         if (this.pageMode) {
           document.body[this.directionKey] = offset;
           document.documentElement[this.directionKey] = offset;
+        } else if (this.scrollelement) {
+          this.scrollelement[this.directionKey] = offset;
         } else {
           var root = this.$refs.root;
 
