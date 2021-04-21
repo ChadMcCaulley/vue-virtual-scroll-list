@@ -168,6 +168,14 @@
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
     },
+    scrollelementOffsetTop: {
+      type: Number,
+      "default": 0
+    },
+    scrollelementOffsetBottom: {
+      type: Number,
+      "default": 0
+    },
     pageMode: {
       type: Boolean,
       "default": false
@@ -711,7 +719,8 @@
     props: VirtualProps,
     data: function data() {
       return {
-        range: null
+        range: null,
+        lastScrollPosition: 0
       };
     },
     watch: {
@@ -807,7 +816,11 @@
         if (this.pageMode) {
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
         } else if (this.scrollelement) {
-          return this.scrollelement[this.directionKey];
+          var position = this.scrollelement[this.directionKey];
+          var scrollingUp = position < this.lastScrollPosition;
+          this.lastScrollPosition = position;
+          if (scrollingUp && position > this.scrollelementOffsetBottom) position -= this.scrollelementOffsetBottom;else if (!scrollingUp && position > this.scrollelementOffsetTop) position -= this.scrollelementOffsetTop;
+          return position;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[this.directionKey]) : 0;
