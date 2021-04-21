@@ -3,8 +3,9 @@
  * we need to know their size change at any time
  */
 
-import Vue from 'vue'
 import { ItemProps, SlotProps } from './props'
+
+import Vue from 'vue'
 
 const Wrapper = {
   created () {
@@ -51,12 +52,12 @@ export const Item = Vue.component('virtual-list-item', {
   props: ItemProps,
 
   render (h) {
-    const { tag, component, extraProps = {}, index, source, scopedSlots = {}, uniqueKey } = this;
+    const { tag, component, extraProps = {}, index, source, scopedSlots = {}, uniqueKey } = this
     const props = {
-        ...extraProps,
-        source,
-        index,
-    };
+      ...extraProps,
+      source,
+      index
+    }
 
     return h(tag, {
       key: uniqueKey,
