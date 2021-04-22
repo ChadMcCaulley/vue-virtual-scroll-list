@@ -131,12 +131,13 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
       } else if (this.scrollelement) {
-        let position = this.scrollelement[this.directionKey]
-        const scrollingUp = position < this.lastScrollPosition
+        const position = this.scrollelement[this.directionKey]
+        const isScrollingUp = position < this.lastScrollPosition
         this.lastScrollPosition = position
-        if (scrollingUp && position > this.scrollelementOffsetBottom) position -= this.scrollelementOffsetBottom
-        else if (!scrollingUp && position > this.scrollelementOffsetTop) position -= this.scrollelementOffsetTop
-        return position
+        let offset = 0
+        if (!isScrollingUp) offset = this.$el.offsetTop
+        else if (isScrollingUp && this.scrollelementOffsetBottom) offset = this.scrollelementOffsetBottom
+        return position > offset ? position - offset : position
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[this.directionKey]) : 0

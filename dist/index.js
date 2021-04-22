@@ -168,10 +168,6 @@
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
     },
-    scrollelementOffsetTop: {
-      type: Number,
-      "default": 0
-    },
     scrollelementOffsetBottom: {
       type: Number,
       "default": 0
@@ -817,10 +813,11 @@
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
         } else if (this.scrollelement) {
           var position = this.scrollelement[this.directionKey];
-          var scrollingUp = position < this.lastScrollPosition;
+          var isScrollingUp = position < this.lastScrollPosition;
           this.lastScrollPosition = position;
-          if (scrollingUp && position > this.scrollelementOffsetBottom) position -= this.scrollelementOffsetBottom;else if (!scrollingUp && position > this.scrollelementOffsetTop) position -= this.scrollelementOffsetTop;
-          return position;
+          var offset = 0;
+          if (!isScrollingUp) offset = this.$el.offsetTop;else if (isScrollingUp && this.scrollelementOffsetBottom) offset = this.scrollelementOffsetBottom;
+          return position > offset ? position - offset : position;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[this.directionKey]) : 0;
