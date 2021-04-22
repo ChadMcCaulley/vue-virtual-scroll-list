@@ -168,10 +168,6 @@
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
     },
-    scrollelementOffsetBottom: {
-      type: Number,
-      "default": 0
-    },
     pageMode: {
       type: Boolean,
       "default": false
@@ -816,7 +812,13 @@
           var isScrollingUp = position < this.lastScrollPosition;
           this.lastScrollPosition = position;
           var offset = 0;
-          if (!isScrollingUp) offset = this.$el.offsetTop;else if (isScrollingUp && this.scrollelementOffsetBottom) offset = this.scrollelementOffsetBottom;
+          if (!isScrollingUp) offset = this.$el.offsetTop;else {
+            var items = this.$el.querySelectorAll('div[role=listitem]');
+
+            for (var i = items.length * 0.2; i > 0; i--) {
+              offset += items[i].clientHeight;
+            }
+          }
           return position > offset ? position - offset : position;
         } else {
           var root = this.$refs.root;

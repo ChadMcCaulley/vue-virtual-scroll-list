@@ -52,10 +52,6 @@ export const VirtualProps = {
     type: typeof window === 'undefined' ? Object : HTMLElement,
     default: null
   },
-  scrollelementOffsetBottom: {
-    type: Number,
-    default: 0
-  },
   pageMode: {
     type: Boolean,
     default: false

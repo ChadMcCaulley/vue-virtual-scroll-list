@@ -136,7 +136,12 @@ const VirtualList = Vue.component('virtual-list', {
         this.lastScrollPosition = position
         let offset = 0
         if (!isScrollingUp) offset = this.$el.offsetTop
-        else if (isScrollingUp && this.scrollelementOffsetBottom) offset = this.scrollelementOffsetBottom
+        else {
+          const items = this.$el.querySelectorAll('div[role=listitem]')
+          for (let i = items.length * 0.2; i > 0; i--) {
+            offset += items[i].clientHeight
+          }
+        }
         return position > offset ? position - offset : position
       } else {
         const { root } = this.$refs
