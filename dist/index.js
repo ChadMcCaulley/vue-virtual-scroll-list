@@ -168,6 +168,11 @@
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
     },
+    scrollelementIsOffset: {
+      type: Boolean,
+      required: false,
+      "default": false
+    },
     pageMode: {
       type: Boolean,
       "default": false
@@ -812,13 +817,14 @@
           var isScrollingUp = position < this.lastScrollPosition;
           this.lastScrollPosition = position;
           var offset = 0;
-          if (!isScrollingUp) offset = this.$el.offsetTop;else {
-            var items = this.$el.querySelectorAll('div[role=listitem]');
+          if (!this.scrollelementIsOffset) return position;
 
-            for (var i = items.length * 0.2; i > 0; i--) {
-              offset += items[i].clientHeight;
-            }
+          if (!isScrollingUp) {
+            offset = this.$el.offsetParent.offsetTop;
+            return position > offset ? position - offset : position;
           }
+
+          offset = this.keeps * this.estimateSize * 0.3;
           return position > offset ? position - offset : position;
         } else {
           var root = this.$refs.root;
