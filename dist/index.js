@@ -820,7 +820,7 @@
           if (!this.scrollelementIsOffset) return position;
 
           if (!isScrollingUp) {
-            offset = this.$el.offsetParent.offsetTop;
+            offset = this.$el.offsetTop;
             return position > offset ? position - offset : position;
           }
 
