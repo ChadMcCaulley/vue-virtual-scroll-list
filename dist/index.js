@@ -711,8 +711,7 @@
     props: VirtualProps,
     data: function data() {
       return {
-        range: null,
-        lastScrollPosition: 0
+        range: null
       };
     },
     watch: {
@@ -807,19 +806,17 @@
       getOffset: function getOffset() {
         if (this.pageMode) {
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
-        } else if (this.scrollelement) {
-          var position = this.scrollelement[this.directionKey];
-          var isScrollingUp = position < this.lastScrollPosition;
-          this.lastScrollPosition = position;
-          var offset = this.$el.offsetTop;
-          if (offset === 0) return position;
-          if (!isScrollingUp) return position > offset ? position - offset : position;
-          offset = this.keeps * this.estimateSize * 0.3;
-          return position > offset ? position - offset : position;
-        } else {
-          var root = this.$refs.root;
-          return root ? Math.ceil(root[this.directionKey]) : 0;
         }
+
+        if (this.scrollelement) {
+          var scrollElementOffset = this.scrollelement.getBoundingClientRect().top;
+          var elementOffset = this.$el.getBoundingClientRect().top;
+          var offset = scrollElementOffset - elementOffset;
+          return offset > 0 ? offset : 0;
+        }
+
+        var root = this.$refs.root;
+        return root ? Math.ceil(root[this.directionKey]) : 0;
       },
       // return client viewport size
       getClientSize: function getClientSize() {

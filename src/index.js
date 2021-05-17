@@ -22,8 +22,7 @@ const VirtualList = Vue.component('virtual-list', {
 
   data () {
     return {
-      range: null,
-      lastScrollPosition: 0
+      range: null
     }
   },
 
@@ -130,19 +129,15 @@ const VirtualList = Vue.component('virtual-list', {
     getOffset () {
       if (this.pageMode) {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
-      } else if (this.scrollelement) {
-        const position = this.scrollelement[this.directionKey]
-        const isScrollingUp = position < this.lastScrollPosition
-        this.lastScrollPosition = position
-        let offset = this.$el.offsetTop
-        if (offset === 0) return position
-        if (!isScrollingUp) return position > offset ? position - offset : position
-        offset = this.keeps * this.estimateSize * 0.3
-        return position > offset ? position - offset : position
-      } else {
-        var root = this.$refs.root
-        return root ? Math.ceil(root[this.directionKey]) : 0
       }
+      if (this.scrollelement) {
+        const scrollElementOffset = this.scrollelement.getBoundingClientRect().top
+        const elementOffset = this.$el.getBoundingClientRect().top
+        const offset = scrollElementOffset - elementOffset
+        return offset > 0 ? offset : 0
+      }
+      var root = this.$refs.root
+      return root ? Math.ceil(root[this.directionKey]) : 0
     },
     // return client viewport size
     getClientSize () {
