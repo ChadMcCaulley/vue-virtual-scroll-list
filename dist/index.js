@@ -838,7 +838,7 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollelement) {
-          return this.scrollelement[key];
+          return this.scrollelement[key] - this.bottomThreshold;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;

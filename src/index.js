@@ -92,7 +92,6 @@ const VirtualList = Vue.component('virtual-list', {
     // in page mode we bind scroll event to document
     if (this.pageMode) {
       this.updatePageModeFront()
-
       document.addEventListener('scroll', this.onScroll, {
         passive: false
       })
@@ -158,7 +157,7 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollelement) {
-        return this.scrollelement[key]
+        return this.scrollelement[key] - this.bottomThreshold
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[key]) : 0
