@@ -164,7 +164,7 @@
       type: Number,
       "default": 0
     },
-    scrollelement: {
+    scrollElement: {
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
     },
@@ -729,19 +729,19 @@
       offset: function offset(newValue) {
         this.scrollToOffset(newValue);
       },
-      scrollelement: function scrollelement(newScrollelement, oldScrollelement) {
+      scrollElement: function scrollElement(newscrollElement, oldscrollElement) {
         if (this.pagemode) {
           return;
         }
 
-        if (oldScrollelement) {
-          this.scrollelement.removeEventListener('scroll', this.onScroll, {
+        if (oldscrollElement) {
+          this.scrollElement.removeEventListener('scroll', this.onScroll, {
             passive: false
           });
         }
 
-        if (newScrollelement) {
-          this.scrollelement.addEventListener('scroll', this.onScroll, {
+        if (newscrollElement) {
+          this.scrollElement.addEventListener('scroll', this.onScroll, {
             passive: false
           });
         }
@@ -776,8 +776,8 @@
         document.addEventListener('scroll', this.onScroll, {
           passive: false
         });
-      } else if (this.scrollelement) {
-        this.scrollelement.addEventListener('scroll', this.onScroll, {
+      } else if (this.scrollElement) {
+        this.scrollElement.addEventListener('scroll', this.onScroll, {
           passive: false
         });
       }
@@ -787,8 +787,8 @@
 
       if (this.pageMode) {
         document.removeEventListener('scroll', this.onScroll);
-      } else if (this.scrollelement) {
-        this.scrollelement.removeEventListener('scroll', this.onScroll, {
+      } else if (this.scrollElement) {
+        this.scrollElement.removeEventListener('scroll', this.onScroll, {
           passive: false
         });
       }
@@ -808,11 +808,8 @@
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
         }
 
-        if (this.scrollelement) {
-          var scrollElementOffset = this.scrollelement.getBoundingClientRect().top;
-          var elementOffset = this.$el.getBoundingClientRect().top;
-          var offset = scrollElementOffset - elementOffset;
-          return offset > 0 ? offset : 0;
+        if (this.scrollElement) {
+          return this.scrollElement[this.directionKey] + this.scrollElement.getBoundingClientRect().top;
         }
 
         var root = this.$refs.root;
@@ -824,8 +821,8 @@
 
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
-        } else if (this.scrollelement) {
-          return this.scrollelement[key];
+        } else if (this.scrollElement) {
+          return this.scrollElement[key];
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -837,8 +834,8 @@
 
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
-        } else if (this.scrollelement) {
-          return this.scrollelement[key] - this.bottomThreshold;
+        } else if (this.scrollElement) {
+          return this.scrollElement[key] - this.bottomThreshold;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -849,8 +846,8 @@
         if (this.pageMode) {
           document.body[this.directionKey] = offset;
           document.documentElement[this.directionKey] = offset;
-        } else if (this.scrollelement) {
-          this.scrollelement[this.directionKey] = offset;
+        } else if (this.scrollElement) {
+          this.scrollElement[this.directionKey] = offset;
         } else {
           var root = this.$refs.root;
 

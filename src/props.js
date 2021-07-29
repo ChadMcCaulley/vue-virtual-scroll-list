@@ -48,7 +48,7 @@ export const VirtualProps = {
     type: Number,
     default: 0
   },
-  scrollelement: {
+  scrollElement: {
     type: typeof window === 'undefined' ? Object : HTMLElement,
     default: null
   },
