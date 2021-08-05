@@ -809,7 +809,15 @@
         }
 
         if (this.scrollElement) {
-          return this.scrollElement[this.directionKey] + this.scrollElement.getBoundingClientRect().top;
+          var scrollTop = this.scrollElement[this.directionKey];
+          var elementBoundingRect = this.$el.getBoundingClientRect();
+          var scrollerBoundingRect = this.scrollElement.getBoundingClientRect();
+          var scrollerTopOffset = scrollerBoundingRect.top;
+          var elementTopOffset = elementBoundingRect.top;
+          var topOffset = 0;
+          if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
+          var offset = scrollTop - topOffset;
+          return offset > 0 ? offset : 0;
         }
 
         var root = this.$refs.root;
@@ -822,7 +830,11 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          return this.scrollElement[key];
+          var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
+          var elementTopOffset = this.$el.getBoundingClientRect().top;
+          var topOffset = scrollerTopOffset;
+          if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
+          return this.scrollElement[key] - topOffset;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
