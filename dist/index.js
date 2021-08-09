@@ -814,10 +814,10 @@
           var scrollerBoundingRect = this.scrollElement.getBoundingClientRect();
           var scrollerTopOffset = scrollerBoundingRect.top;
           var elementTopOffset = elementBoundingRect.top;
-          var topOffset = 0;
-          if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
+          var topOffset = elementTopOffset > 0 ? elementTopOffset - scrollerTopOffset : 0;
           var offset = scrollTop - topOffset;
-          return offset > 0 ? offset : 0;
+          if (this.virtual.isFront()) offset += this.bottomThreshold;
+          return offset < 0 ? 0 : offset;
         }
 
         var root = this.$refs.root;

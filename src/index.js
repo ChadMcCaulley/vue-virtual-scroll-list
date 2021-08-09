@@ -135,10 +135,10 @@ const VirtualList = Vue.component('virtual-list', {
         const scrollerBoundingRect = this.scrollElement.getBoundingClientRect()
         const scrollerTopOffset = scrollerBoundingRect.top
         const elementTopOffset = elementBoundingRect.top
-        let topOffset = 0
-        if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset
-        const offset = scrollTop - topOffset
-        return offset > 0 ? offset : 0
+        const topOffset = elementTopOffset > 0 ? elementTopOffset - scrollerTopOffset : 0
+        let offset = scrollTop - topOffset
+        if (this.virtual.isFront()) offset += this.bottomThreshold
+        return offset < 0 ? 0 : offset
       }
       var root = this.$refs.root
       return root ? Math.ceil(root[this.directionKey]) : 0
