@@ -164,6 +164,10 @@
       type: Number,
       "default": 0
     },
+    bottomOffset: {
+      type: Number,
+      "default": 0
+    },
     scrollElement: {
       type: typeof window === 'undefined' ? Object : HTMLElement,
       "default": null
@@ -810,13 +814,8 @@
 
         if (this.scrollElement) {
           var scrollTop = this.scrollElement[this.directionKey];
-          var elementBoundingRect = this.$el.getBoundingClientRect();
-          var scrollerBoundingRect = this.scrollElement.getBoundingClientRect();
-          var scrollerTopOffset = scrollerBoundingRect.top;
-          var elementTopOffset = elementBoundingRect.top;
-          var topOffset = elementTopOffset > 0 ? elementTopOffset - scrollerTopOffset : 0;
-          var offset = scrollTop - topOffset;
-          if (this.virtual.isFront()) offset += this.bottomThreshold;
+          var offset = scrollTop - this.getVirtualTopOffset();
+          if (this.virtual.isFront()) offset = scrollTop + this.bottomOffset;
           return offset < 0 ? 0 : offset;
         }
 
@@ -830,15 +829,22 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
-          var elementTopOffset = this.$el.getBoundingClientRect().top;
-          var topOffset = scrollerTopOffset;
-          if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
-          return this.scrollElement[key] - topOffset;
+          if (this.virtual.isFront()) return this.scrollElement[key] - this.bottomOffset;
+          return this.scrollElement[key] - this.getVirtualTopOffset();
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
         }
+      },
+      // return the offset from the top of the scrollbar to the start of the virtual list
+      getVirtualTopOffset: function getVirtualTopOffset() {
+        var elementBoundingRect = this.$el.getBoundingClientRect();
+        var scrollerBoundingRect = this.scrollElement.getBoundingClientRect();
+        var scrollerTopOffset = scrollerBoundingRect.top;
+        var elementTopOffset = elementBoundingRect.top;
+        var topOffset = 0;
+        if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
+        return topOffset;
       },
       // return all scroll size
       getScrollSize: function getScrollSize() {
@@ -847,7 +853,7 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          return this.scrollElement[key] - this.bottomThreshold;
+          return this.scrollElement[key];
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -974,7 +980,7 @@
 
         if (this.virtual.isFront() && !!this.dataSources.length && offset - this.topThreshold <= 0) {
           this.$emit('totop');
-        } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold >= scrollSize) {
+        } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold + this.bottomOffset >= scrollSize) {
           this.$emit('tobottom');
         }
       },

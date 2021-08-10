@@ -131,13 +131,8 @@ const VirtualList = Vue.component('virtual-list', {
       }
       if (this.scrollElement) {
         const scrollTop = this.scrollElement[this.directionKey]
-        const elementBoundingRect = this.$el.getBoundingClientRect()
-        const scrollerBoundingRect = this.scrollElement.getBoundingClientRect()
-        const scrollerTopOffset = scrollerBoundingRect.top
-        const elementTopOffset = elementBoundingRect.top
-        const topOffset = elementTopOffset > 0 ? elementTopOffset - scrollerTopOffset : 0
-        let offset = scrollTop - topOffset
-        if (this.virtual.isFront()) offset += this.bottomThreshold
+        let offset = scrollTop - this.getVirtualTopOffset()
+        if (this.virtual.isFront()) offset = scrollTop + this.bottomOffset
         return offset < 0 ? 0 : offset
       }
       var root = this.$refs.root
@@ -149,15 +144,22 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
-        const elementTopOffset = this.$el.getBoundingClientRect().top
-        let topOffset = scrollerTopOffset
-        if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset
-        return this.scrollElement[key] - topOffset
+        if (this.virtual.isFront()) return this.scrollElement[key] - this.bottomOffset
+        return this.scrollElement[key] - this.getVirtualTopOffset()
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[key]) : 0
       }
+    },
+    // return the offset from the top of the scrollbar to the start of the virtual list
+    getVirtualTopOffset () {
+      const elementBoundingRect = this.$el.getBoundingClientRect()
+      const scrollerBoundingRect = this.scrollElement.getBoundingClientRect()
+      const scrollerTopOffset = scrollerBoundingRect.top
+      const elementTopOffset = elementBoundingRect.top
+      let topOffset = 0
+      if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset
+      return topOffset
     },
 
     // return all scroll size
@@ -166,7 +168,7 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        return this.scrollElement[key] - this.bottomThreshold
+        return this.scrollElement[key]
       } else {
         const { root } = this.$refs
         return root ? Math.ceil(root[key]) : 0
@@ -301,7 +303,7 @@ const VirtualList = Vue.component('virtual-list', {
 
       if (this.virtual.isFront() && !!this.dataSources.length && (offset - this.topThreshold <= 0)) {
         this.$emit('totop')
-      } else if (this.virtual.isBehind() && (offset + clientSize + this.bottomThreshold >= scrollSize)) {
+      } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold + this.bottomOffset >= scrollSize) {
         this.$emit('tobottom')
       }
     },
