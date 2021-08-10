@@ -22,6 +22,7 @@ const VirtualList = Vue.component('virtual-list', {
 
   data () {
     return {
+      prevOffset: 0,
       range: null
     }
   },
@@ -130,10 +131,11 @@ const VirtualList = Vue.component('virtual-list', {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
       }
       if (this.scrollElement) {
-        const scrollTop = this.scrollElement[this.directionKey]
-        let offset = scrollTop - this.getVirtualTopOffset()
-        if (this.virtual.isFront()) offset += (this.bottomOffset / 2)
-        return offset < 0 ? 0 : offset
+        const scrollLoc = this.scrollElement[this.directionKey]
+        let offset = scrollLoc - this.getVirtualTopOffset()
+        if (offset < this.prevOffset) offset += this.bottomOffset
+        this.prevOffset = scrollLoc
+        return offset > 0 ? offset : 0
       }
       var root = this.$refs.root
       return root ? Math.ceil(root[this.directionKey]) : 0
@@ -152,15 +154,14 @@ const VirtualList = Vue.component('virtual-list', {
     },
     // return the offset from the top of the scrollbar to the start of the virtual list
     getVirtualTopOffset () {
-      const elementBoundingRect = this.$el.getBoundingClientRect()
-      const scrollerBoundingRect = this.scrollElement.getBoundingClientRect()
-      const scrollerTopOffset = scrollerBoundingRect.top
-      const elementTopOffset = elementBoundingRect.top
-      let topOffset = 0
-      if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset
-      return topOffset
+      const elementTopOffset = this.$el.getBoundingClientRect().top
+      const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+      if (scrollerTopOffset > 0) {
+        if (elementTopOffset < 0) return 0
+        return elementTopOffset - scrollerTopOffset
+      }
+      return elementTopOffset + this.scrollElement[this.directionKey]
     },
-
     // return all scroll size
     getScrollSize () {
       const key = this.isHorizontal ? 'scrollWidth' : 'scrollHeight'

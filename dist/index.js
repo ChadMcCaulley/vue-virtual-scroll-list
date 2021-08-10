@@ -715,6 +715,7 @@
     props: VirtualProps,
     data: function data() {
       return {
+        prevOffset: 0,
         range: null
       };
     },
@@ -813,10 +814,11 @@
         }
 
         if (this.scrollElement) {
-          var scrollTop = this.scrollElement[this.directionKey];
-          var offset = scrollTop - this.getVirtualTopOffset();
-          if (this.virtual.isFront()) offset += this.bottomOffset / 2;
-          return offset < 0 ? 0 : offset;
+          var scrollLoc = this.scrollElement[this.directionKey];
+          var offset = scrollLoc - this.getVirtualTopOffset();
+          if (offset < this.prevOffset) offset += this.bottomOffset;
+          this.prevOffset = scrollLoc;
+          return offset > 0 ? offset : 0;
         }
 
         var root = this.$refs.root;
@@ -837,13 +839,15 @@
       },
       // return the offset from the top of the scrollbar to the start of the virtual list
       getVirtualTopOffset: function getVirtualTopOffset() {
-        var elementBoundingRect = this.$el.getBoundingClientRect();
-        var scrollerBoundingRect = this.scrollElement.getBoundingClientRect();
-        var scrollerTopOffset = scrollerBoundingRect.top;
-        var elementTopOffset = elementBoundingRect.top;
-        var topOffset = 0;
-        if (elementTopOffset > 0) topOffset = elementTopOffset - scrollerTopOffset;
-        return topOffset;
+        var elementTopOffset = this.$el.getBoundingClientRect().top;
+        var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
+
+        if (scrollerTopOffset > 0) {
+          if (elementTopOffset < 0) return 0;
+          return elementTopOffset - scrollerTopOffset;
+        }
+
+        return elementTopOffset + this.scrollElement[this.directionKey];
       },
       // return all scroll size
       getScrollSize: function getScrollSize() {
