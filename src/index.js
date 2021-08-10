@@ -132,7 +132,7 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.scrollElement) {
         const scrollTop = this.scrollElement[this.directionKey]
         let offset = scrollTop - this.getVirtualTopOffset()
-        if (this.virtual.isFront()) offset = scrollTop + this.bottomOffset
+        if (this.virtual.isFront()) offset += (this.bottomOffset / 2)
         return offset < 0 ? 0 : offset
       }
       var root = this.$refs.root
@@ -144,7 +144,6 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        if (this.virtual.isFront()) return this.scrollElement[key] - this.bottomOffset
         return this.scrollElement[key] - this.getVirtualTopOffset()
       } else {
         const { root } = this.$refs

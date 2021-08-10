@@ -815,7 +815,7 @@
         if (this.scrollElement) {
           var scrollTop = this.scrollElement[this.directionKey];
           var offset = scrollTop - this.getVirtualTopOffset();
-          if (this.virtual.isFront()) offset = scrollTop + this.bottomOffset;
+          if (this.virtual.isFront()) offset += this.bottomOffset / 2;
           return offset < 0 ? 0 : offset;
         }
 
@@ -829,7 +829,6 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          if (this.virtual.isFront()) return this.scrollElement[key] - this.bottomOffset;
           return this.scrollElement[key] - this.getVirtualTopOffset();
         } else {
           var root = this.$refs.root;
