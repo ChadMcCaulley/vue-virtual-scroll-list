@@ -734,18 +734,19 @@
       offset: function offset(newValue) {
         this.scrollToOffset(newValue);
       },
-      scrollElement: function scrollElement(newscrollElement, oldscrollElement) {
+      scrollElement: function scrollElement(newScrollElement, oldScrollElement) {
         if (this.pagemode) {
           return;
         }
 
-        if (oldscrollElement) {
+        if (oldScrollElement) {
           this.scrollElement.removeEventListener('scroll', this.onScroll, {
             passive: false
           });
         }
 
-        if (newscrollElement) {
+        if (newScrollElement) {
+          this.scrollToOffset(0);
           this.scrollElement.addEventListener('scroll', this.onScroll, {
             passive: false
           });
