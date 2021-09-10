@@ -316,6 +316,7 @@ const VirtualList = Vue.component('virtual-list', {
       const slots = []
       const { start, end } = this.range
       const { dataSources, dataKey, itemClass, itemTag, itemStyle, isHorizontal, extraProps, dataComponent, itemScopedSlots } = this
+      const slotComponent = this.$scopedSlots && this.$scopedSlots.item
       for (let index = start; index <= end; index++) {
         const dataSource = dataSources[index]
         if (dataSource) {
@@ -331,6 +332,7 @@ const VirtualList = Vue.component('virtual-list', {
                 source: dataSource,
                 extraProps: extraProps,
                 component: dataComponent,
+                slotComponent: slotComponent,
                 scopedSlots: itemScopedSlots
               },
               style: itemStyle,
