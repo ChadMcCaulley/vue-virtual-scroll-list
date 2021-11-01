@@ -823,8 +823,12 @@
         }
 
         if (this.scrollElement) {
+          var elementTopOffset = this.$el.getBoundingClientRect().top;
+          var elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey];
           var scrollLoc = this.scrollElement[this.directionKey];
-          var offset = scrollLoc - this.getVirtualTopOffset();
+          var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
+          var topOffset = elementDistToTop - scrollerTopOffset;
+          var offset = scrollLoc - topOffset;
           if (offset < this.prevOffset) offset += this.bottomOffset;
           this.prevOffset = scrollLoc;
           return offset > 0 ? offset : 0;
@@ -849,14 +853,9 @@
       // return the offset from the top of the scrollbar to the start of the virtual list
       getVirtualTopOffset: function getVirtualTopOffset() {
         var elementTopOffset = this.$el.getBoundingClientRect().top;
+        var elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey];
         var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
-
-        if (scrollerTopOffset > 0) {
-          if (elementTopOffset < 0) return 0;
-          return elementTopOffset - scrollerTopOffset;
-        }
-
-        return elementTopOffset + this.scrollElement[this.directionKey];
+        return elementDistToTop - scrollerTopOffset;
       },
       // return all scroll size
       getScrollSize: function getScrollSize() {
@@ -865,7 +864,7 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          return this.scrollElement[key];
+          return this.scrollElement[key] - this.getVirtualTopOffset();
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;

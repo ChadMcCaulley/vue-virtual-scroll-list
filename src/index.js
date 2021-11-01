@@ -131,13 +131,19 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
       }
+
       if (this.scrollElement) {
+        const elementTopOffset = this.$el.getBoundingClientRect().top
+        const elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey]
         const scrollLoc = this.scrollElement[this.directionKey]
-        let offset = scrollLoc - this.getVirtualTopOffset()
+        const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+        const topOffset = elementDistToTop - scrollerTopOffset
+        let offset = scrollLoc - topOffset
         if (offset < this.prevOffset) offset += this.bottomOffset
         this.prevOffset = scrollLoc
         return offset > 0 ? offset : 0
       }
+
       var root = this.$refs.root
       return root ? Math.ceil(root[this.directionKey]) : 0
     },
@@ -149,19 +155,16 @@ const VirtualList = Vue.component('virtual-list', {
       } else if (this.scrollElement) {
         return this.scrollElement[key] - this.getVirtualTopOffset()
       } else {
-        const { root } = this.$refs
+        const root = this.$refs.root
         return root ? Math.ceil(root[key]) : 0
       }
     },
     // return the offset from the top of the scrollbar to the start of the virtual list
     getVirtualTopOffset () {
       const elementTopOffset = this.$el.getBoundingClientRect().top
+      const elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey]
       const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
-      if (scrollerTopOffset > 0) {
-        if (elementTopOffset < 0) return 0
-        return elementTopOffset - scrollerTopOffset
-      }
-      return elementTopOffset + this.scrollElement[this.directionKey]
+      return elementDistToTop - scrollerTopOffset
     },
     // return all scroll size
     getScrollSize () {
@@ -169,9 +172,9 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        return this.scrollElement[key]
+        return this.scrollElement[key] - this.getVirtualTopOffset()
       } else {
-        const { root } = this.$refs
+        const root = this.$refs.root
         return root ? Math.ceil(root[key]) : 0
       }
     },
