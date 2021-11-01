@@ -41,9 +41,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "chat-room" */ '../views/chat-room/Main.vue')
   },
   {
-    path: '/scrollelement',
-    name: 'scrollelement',
-    component: () => import(/* webpackChunkName: "scrollelement" */ '../views/scrollelement/Main.vue')
+    path: '/scroll-element',
+    name: 'scroll-element',
+    component: () => import(/* webpackChunkName: "scroll-element" */ '../views/scroll-element/Main.vue')
   },
   {
     path: '/page-mode',

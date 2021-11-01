@@ -1,18 +1,20 @@
 <template>
   <div class="example">
     <github-corner />
-    <introduction description="When a <code>scollelement</code> is provided the list will base it's scrolling on that scrollbar." />
+    <introduction description="The <code>scrollElement</code> prop allows for scrollbars that are not attached or at the page level." />
 
     <div class="example-content">
-      <div ref="main" class="content__container">
-      <div>
+      <div ref="scrollElement" class="scroll-element">
+        <div class="box">
+          Some Header
+        </div>
         <virtual-list class="list-page scroll-touch" ref="vsl"
           :data-key="'id'"
           :data-sources="items"
           :data-component="itemComponent"
           :estimate-size="135"
           :item-class="'list-item-page'"
-          :scrollelement="scrollelement"
+          :scroll-element="scrollElement"
           v-on:totop="totop"
           v-on:tobottom="tobottom"
         />
@@ -20,16 +22,17 @@
           <h2>This is page footer</h2>
         </div>
       </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
 import Item from './Item'
+
 import { Random } from '../../common/mock'
 import getSentences from '../../common/sentences'
 import genUniqueId from '../../common/gen-unique-id'
+
 const TOTAL_COUNT = 1000
 
 const DataItems = []
@@ -43,19 +46,22 @@ while (count--) {
     desc: getSentences()
   })
 }
+
 export default {
-  name: 'scrollelement',
+  name: 'page-mode',
+
   components: {
   },
+
   data () {
     return {
-      scrollelement: null,
       items: DataItems,
       itemComponent: Item,
+      scrollElement: null
     }
   },
-  mounted () {
-    this.scrollelement = this.$refs.main
+  mounted() {
+    this.scrollElement = this.$refs.scrollElement
   },
   methods: {
     totop () {
@@ -69,9 +75,6 @@ export default {
 </script>
 
 <style lang="less">
-.app {
-  height: 100%;
-}
 .list-page {
   width: 100%;
   border: 2px solid;
@@ -87,15 +90,18 @@ export default {
     border-color: lightgray;
   }
 }
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: auto;
+.bottom {
+  padding: 2em 0;
 }
-.content__container {
-  height: 500px;
-  width: 800px;
-  overflow: auto;
+.box {
+  height: 300px;
+  margin-bottom: 100px;
+  background: rgba(0,0,0,0.3);
+}
+.scroll-element {
+  overflow: scroll;
+  height: 800px;
+  padding-right: 20px;
+  overflow-x: hidden;
 }
 </style>
