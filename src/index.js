@@ -161,10 +161,16 @@ const VirtualList = Vue.component('virtual-list', {
     },
     // return the offset from the top of the scrollbar to the start of the virtual list
     getVirtualTopOffset () {
-      const elementTopOffset = this.$el.getBoundingClientRect().top
-      const elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey]
-      const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
-      return elementDistToTop - scrollerTopOffset
+      var elementTopOffset = this.$el.getBoundingClientRect().top
+      var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+
+      if (scrollerTopOffset > 0) {
+        if (elementTopOffset < 0) return 0
+        const offset = elementTopOffset - scrollerTopOffset
+        return offset > 0 ? offset : 0
+      }
+      const offset = elementTopOffset + this.scrollElement[this.directionKey]
+      return offset > 0 ? offset : 0
     },
     // return all scroll size
     getScrollSize () {
