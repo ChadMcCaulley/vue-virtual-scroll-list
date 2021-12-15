@@ -133,13 +133,13 @@ const VirtualList = Vue.component('virtual-list', {
       }
 
       if (this.scrollElement) {
-        const elementTopOffset = this.$el.getBoundingClientRect().top
-        const elementDistToTop = elementTopOffset + this.scrollElement[this.directionKey]
         const scrollLoc = this.scrollElement[this.directionKey]
-        const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
-        const topOffset = elementDistToTop - scrollerTopOffset
-        let offset = scrollLoc - topOffset
+        const offsetTop = this.getOffsetBetweenTopVirtualListTopScrollbar()
+        let offset = 0
+        if (this.bottomOffset > 0) offset = scrollLoc + offsetTop
+        else offset = scrollLoc - offsetTop
         if (offset < this.prevOffset) offset += this.bottomOffset
+        else offset -= this.bottomOffset
         this.prevOffset = scrollLoc
         return offset > 0 ? offset : 0
       }
@@ -153,24 +153,26 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        return this.scrollElement[key] - this.getVirtualTopOffset()
+        return this.scrollElement[key] - this.getCurrentDistFromTopListToTopScrollbar()
       } else {
         const root = this.$refs.root
         return root ? Math.ceil(root[key]) : 0
       }
     },
-    // return the offset from the top of the scrollbar to the start of the virtual list
-    getVirtualTopOffset () {
-      var elementTopOffset = this.$el.getBoundingClientRect().top
-      var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
-
+    // return the offset from the top of the scrollbar to the top of the virtual list
+    getOffsetBetweenTopVirtualListTopScrollbar () {
+      const elementTopOffset = this.$el.getBoundingClientRect().top
+      const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+      return elementTopOffset + this.scrollElement[this.directionKey] - scrollerTopOffset
+    },
+    getCurrentDistFromTopListToTopScrollbar () {
+      const elementTopOffset = this.$el.getBoundingClientRect().top
+      const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+      if (elementTopOffset < 0) return 0
       if (scrollerTopOffset > 0) {
-        if (elementTopOffset < 0) return 0
-        const offset = elementTopOffset - scrollerTopOffset
-        return offset > 0 ? offset : 0
+        return elementTopOffset - scrollerTopOffset
       }
-      const offset = elementTopOffset + this.scrollElement[this.directionKey]
-      return offset > 0 ? offset : 0
+      return elementTopOffset - this.scrollElement[this.directionKey]
     },
     // return all scroll size
     getScrollSize () {
