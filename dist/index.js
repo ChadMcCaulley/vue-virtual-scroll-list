@@ -861,16 +861,9 @@
       },
       // return the offset from the top of the scrollbar to the start of the virtual list
       getVirtualTopOffset: function getVirtualTopOffset() {
-        var elementTopOffset = this.$el.getBoundingClientRect().top;
+        var elementTopOffset = this.$el.getBoundingClientRect().top + this.scrollElement[this.directionKey];
         var scrollerTopOffset = this.scrollElement.getBoundingClientRect().top;
-        var offset = elementTopOffset + this.scrollElement[this.directionKey];
-
-        if (scrollerTopOffset > 0) {
-          if (elementTopOffset < 0) return 0;
-          offset = elementTopOffset - scrollerTopOffset;
-        }
-
-        return offset > 0 ? offset : 0;
+        return elementTopOffset - scrollerTopOffset;
       },
       // set current scroll position to a expectant offset
       scrollToOffset: function scrollToOffset(offset) {
