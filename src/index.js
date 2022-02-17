@@ -22,6 +22,7 @@ const VirtualList = Vue.component('virtual-list', {
 
   data () {
     return {
+      prevOffset: 0,
       range: null
     }
   },
@@ -130,7 +131,13 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[this.directionKey] || document.body[this.directionKey]
       }
-      if (this.scrollElement) return this.scrollElement[this.directionKey]
+      if (this.scrollElement) {
+        var scrollLoc = this.scrollElement[this.directionKey]
+        var offset = scrollLoc - this.getVirtualTopOffset()
+        if (offset < this.prevOffset) offset += this.bottomOffset
+        this.prevOffset = scrollLoc
+        return offset > 0 ? offset : 0
+      }
       var root = this.$refs.root
       return root ? Math.ceil(root[this.directionKey]) : 0
     },
@@ -140,7 +147,7 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.pageMode) {
         return document.documentElement[key] || document.body[key]
       } else if (this.scrollElement) {
-        return this.scrollElement[key]
+        return this.scrollElement[key] - this.getVirtualTopOffset()
       } else {
         const root = this.$refs.root
         return root ? Math.ceil(root[key]) : 0
@@ -158,7 +165,17 @@ const VirtualList = Vue.component('virtual-list', {
         return root ? Math.ceil(root[key]) : 0
       }
     },
-
+    // return the offset from the top of the scrollbar to the start of the virtual list
+    getVirtualTopOffset () {
+      const elementTopOffset = this.$el.getBoundingClientRect().top
+      const scrollerTopOffset = this.scrollElement.getBoundingClientRect().top
+      let offset = elementTopOffset + this.scrollElement[this.directionKey]
+      if (scrollerTopOffset > 0) {
+        if (elementTopOffset < 0) return 0
+        offset = elementTopOffset - scrollerTopOffset
+      }
+      return offset > 0 ? offset : 0
+    },
     // set current scroll position to a expectant offset
     scrollToOffset (offset) {
       if (this.pageMode) {
