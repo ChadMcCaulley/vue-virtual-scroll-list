@@ -1,5 +1,5 @@
 /*!
- * vue-virtual-scroll-list v2.3.4
+ * vue-virtual-scroll-list v2.3.5
  * open source under the MIT license
  * https://github.com/tangbc/vue-virtual-scroll-list#readme
  */
@@ -724,7 +724,9 @@
     data: function data() {
       return {
         prevOffset: 0,
-        range: null
+        range: null,
+        virtualTopOffset: null,
+        virtualTopOffsetTimeout: null
       };
     },
     watch: {
@@ -829,13 +831,22 @@
       },
       // return current scroll offset
       getOffset: function getOffset() {
+        var _this = this;
+
         if (this.pageMode) {
           return document.documentElement[this.directionKey] || document.body[this.directionKey];
         }
 
         if (this.scrollElement) {
           var scrollLoc = this.scrollElement[this.directionKey];
-          var offset = scrollLoc - this.getVirtualTopOffset();
+          var offset = scrollLoc;
+          if (!this.virtualTopOffset === null) this.virtualTopOffset = this.getVirtualTopOffset();else if (this.virtualTopOffsetTimeout === null) {
+            this.virtualTopOffsetTimeout = setTimeout(function () {
+              _this.virtualTopOffset = _this.getVirtualTopOffset();
+              _this.virtualTopOffsetTimeout = null;
+            }, 2000);
+          }
+          if (scrollLoc < this.virtualTopOffset) offset = scrollLoc - this.virtualTopOffset;
           if (offset < this.prevOffset) offset += this.bottomOffset;
           this.prevOffset = scrollLoc;
           return offset > 0 ? offset : 0;
@@ -851,7 +862,7 @@
         if (this.pageMode) {
           return document.documentElement[key] || document.body[key];
         } else if (this.scrollElement) {
-          return this.scrollElement[key] - this.getVirtualTopOffset();
+          return this.scrollElement[key] - this.virtualTopOffset;
         } else {
           var root = this.$refs.root;
           return root ? Math.ceil(root[key]) : 0;
@@ -903,7 +914,7 @@
       },
       // set current scroll position to bottom
       scrollToBottom: function scrollToBottom() {
-        var _this = this;
+        var _this2 = this;
 
         var shepherd = this.$refs.shepherd;
 
@@ -914,8 +925,8 @@
           // so we need retry in next event loop until it really at bottom
 
           setTimeout(function () {
-            if (_this.getOffset() + _this.getClientSize() < _this.getScrollSize()) {
-              _this.scrollToBottom();
+            if (_this2.getOffset() + _this2.getClientSize() < _this2.getScrollSize()) {
+              _this2.scrollToBottom();
             }
           }, 3);
         }
