@@ -156,8 +156,6 @@ const VirtualList = Vue.component('virtual-list', {
           }, 2000)
         }
         if (scrollLoc < this.virtualTopOffset) offset = scrollLoc - this.virtualTopOffset
-        if (offset < this.prevOffset) offset += this.bottomOffset
-        this.prevOffset = scrollLoc
         return offset > 0 ? offset : 0
       }
       var root = this.$refs.root
@@ -321,7 +319,7 @@ const VirtualList = Vue.component('virtual-list', {
 
       if (this.virtual.isFront() && !!this.dataSources.length && (offset - this.topThreshold <= 0)) {
         this.$emit('totop')
-      } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold + this.bottomOffset >= scrollSize) {
+      } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold >= scrollSize) {
         this.$emit('tobottom')
       }
     },

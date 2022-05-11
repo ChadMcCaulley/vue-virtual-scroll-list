@@ -1,5 +1,5 @@
 /*!
- * vue-virtual-scroll-list v2.3.5
+ * vue-virtual-scroll-list v2.3.6
  * open source under the MIT license
  * https://github.com/tangbc/vue-virtual-scroll-list#readme
  */
@@ -161,10 +161,6 @@
       "default": 0
     },
     bottomThreshold: {
-      type: Number,
-      "default": 0
-    },
-    bottomOffset: {
       type: Number,
       "default": 0
     },
@@ -847,8 +843,6 @@
             }, 2000);
           }
           if (scrollLoc < this.virtualTopOffset) offset = scrollLoc - this.virtualTopOffset;
-          if (offset < this.prevOffset) offset += this.bottomOffset;
-          this.prevOffset = scrollLoc;
           return offset > 0 ? offset : 0;
         }
 
@@ -1008,7 +1002,7 @@
 
         if (this.virtual.isFront() && !!this.dataSources.length && offset - this.topThreshold <= 0) {
           this.$emit('totop');
-        } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold + this.bottomOffset >= scrollSize) {
+        } else if (this.virtual.isBehind() && offset + clientSize + this.bottomThreshold >= scrollSize) {
           this.$emit('tobottom');
         }
       },
