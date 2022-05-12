@@ -148,14 +148,14 @@ const VirtualList = Vue.component('virtual-list', {
       if (this.scrollElement) {
         const scrollLoc = this.scrollElement[this.directionKey]
         let offset = scrollLoc
-        if (!this.virtualTopOffset === null) this.virtualTopOffset = this.getVirtualTopOffset()
+        if (this.virtualTopOffset === null) this.virtualTopOffset = this.getVirtualTopOffset()
         else if (this.virtualTopOffsetTimeout === null) {
           this.virtualTopOffsetTimeout = setTimeout(() => {
             this.virtualTopOffset = this.getVirtualTopOffset()
             this.virtualTopOffsetTimeout = null
-          }, 2000)
+          }, 20000)
         }
-        if (scrollLoc < this.virtualTopOffset) offset = scrollLoc - this.virtualTopOffset
+        if (scrollLoc < this.virtualTopOffset || this.maintainTopOffset) offset = scrollLoc - this.virtualTopOffset
         return offset > 0 ? offset : 0
       }
       var root = this.$refs.root

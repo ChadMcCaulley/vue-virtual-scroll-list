@@ -109,6 +109,11 @@ export const VirtualProps = {
   },
   itemScopedSlots: {
     type: Object
+  },
+  maintainTopOffset: {
+    default: false,
+    required: false,
+    type: Boolean
   }
 }
 

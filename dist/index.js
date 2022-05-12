@@ -1,5 +1,5 @@
 /*!
- * vue-virtual-scroll-list v2.3.6
+ * vue-virtual-scroll-list v2.3.7
  * open source under the MIT license
  * https://github.com/tangbc/vue-virtual-scroll-list#readme
  */
@@ -225,6 +225,11 @@
     },
     itemScopedSlots: {
       type: Object
+    },
+    maintainTopOffset: {
+      "default": false,
+      required: false,
+      type: Boolean
     }
   };
   var ItemProps = {
@@ -836,13 +841,13 @@
         if (this.scrollElement) {
           var scrollLoc = this.scrollElement[this.directionKey];
           var offset = scrollLoc;
-          if (!this.virtualTopOffset === null) this.virtualTopOffset = this.getVirtualTopOffset();else if (this.virtualTopOffsetTimeout === null) {
+          if (this.virtualTopOffset === null) this.virtualTopOffset = this.getVirtualTopOffset();else if (this.virtualTopOffsetTimeout === null) {
             this.virtualTopOffsetTimeout = setTimeout(function () {
               _this.virtualTopOffset = _this.getVirtualTopOffset();
               _this.virtualTopOffsetTimeout = null;
-            }, 2000);
+            }, 20000);
           }
-          if (scrollLoc < this.virtualTopOffset) offset = scrollLoc - this.virtualTopOffset;
+          if (scrollLoc < this.virtualTopOffset || this.maintainTopOffset) offset = scrollLoc - this.virtualTopOffset;
           return offset > 0 ? offset : 0;
         }
 
