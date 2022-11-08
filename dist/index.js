@@ -1,5 +1,5 @@
 /*!
- * vue-virtual-scroll-list v2.3.7
+ * vue-virtual-scroll-list v3.0.0
  * open source under the MIT license
  * https://github.com/tangbc/vue-virtual-scroll-list#readme
  */
